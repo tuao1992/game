@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Weldrite brand palette: blue / white / red -->
+    <color name="brand_blue">#1565C0</color>
+    <color name="brand_blue_dark">#0E2A47</color>
+    <color name="brand_blue_light">#42A5F5</color>
+    <color name="brand_white">#FFFFFF</color>
+    <color name="brand_red">#E53935</color>
+</resources>

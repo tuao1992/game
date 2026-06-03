@@ -1,0 +1,17 @@
+# Gradle / Android build
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+captures/
+.cxx/
+
+# Keep the demo signing material out of accidental edits, but it IS committed
+# intentionally so the project builds a signed release APK out of the box.
+# (see README — replace before any real distribution)
+
+# OS / editor noise
+.DS_Store
+*.log
