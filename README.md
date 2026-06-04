@@ -37,7 +37,10 @@ network calls, no ads, and no in‑app purchases.
 - **3 game modes**: Career (50 progressive levels), Time Attack (60s), Endless.
 - **5 pipe sizes** (½″, ¾″, 1″, 1.5″, 2″) and **4 fittings** (elbow, tee,
   coupler, reducer).
-- **Progression**: stars, six plumber ranks, and 9 achievements.
+- **Progression**: stars, six plumber ranks, 9 achievements, and a **daily streak**.
+- **Juice & game feel**: screen shake, hit-stop (freeze-frame), particle bursts,
+  floating "PERFECT / GREAT / GOOD" judgments, a **combo system** with escalating
+  feedback and rising pitch, "GET READY / GO!" intros, and a **FLAWLESS** bonus.
 - **Interactive, skippable tutorial** covering all five core skills.
 - **Settings**: Music, Sound FX, Haptics, **Language (English / Español /
   हिन्दी)**, and Graphics Quality (Low / Medium / High).
@@ -98,6 +101,39 @@ Progress, settings and achievements are saved locally (SharedPreferences) and
 persist between sessions.
 
 ---
+
+## 🎚️ Game Feel & Retention (research-informed)
+
+Design decisions are grounded in established game-feel and mobile-retention
+research:
+
+- **Juice / impact feedback** — screen shake, **hit-stop**, particle bursts on
+  contact, easing/overshoot pop-ins, color flashes and a vignette for focus.
+  Effects "echo the core gameplay" and scale with the moment (a perfect joint
+  shakes harder than a cut). Screen-shake strength scales with the **Graphics
+  Quality** setting, so *Low* doubles as a reduce-motion option. (Vlambeer's
+  *Art of Screenshake*; GameAnalytics, *Squeezing more juice out of your game*.)
+- **Success gradation + outcome binding** — every step shows an instant
+  judgment ("PERFECT / GREAT / GOOD") and floating `+points`, and a **combo**
+  multiplier rewards skillful streaks with escalating visuals and rising-pitch
+  audio. (CHI 2024, *How does Juicy Game Feedback Motivate?*)
+- **Near-miss effect** — a just-missed perfect shows "SO CLOSE!" to encourage
+  another try (players are ~2.4× more likely to continue after a near-win).
+- **Gentle onboarding & flow** — an auto-launching interactive tutorial, a
+  "GET READY / GO!" intro, and an **assist** that widens tolerances and slows
+  timing on the first three career levels, keeping the early difficulty slope
+  shallow while visual complexity ramps up across the six environments.
+- **Retention loop** — a **daily streak** counter on the menu, plus stars,
+  ranks and achievements.
+- **Mobile UX** — large touch targets, primary actions in the bottom thumb-zone,
+  high-contrast text with backing panels, and gesture-first interactions.
+- **Audio** — synthesized SFX with a subtle ambient workshop pad beneath the
+  music ("felt, not heard").
+
+*Sources:* [GameAnalytics – Squeezing more juice](https://www.gameanalytics.com/blog/squeezing-more-juice-out-of-your-game-design),
+[CHI 2024 – Juicy Game Feedback](https://dl.acm.org/doi/10.1145/3613904.3642656),
+[Mobile UX – tap targets & thumb zones](https://parachutedesign.ca/blog/thumb-zone-ux/),
+[Hyper-casual retention & difficulty](https://riseuplabs.com/game-retention-metrics/).
 
 ## 🧱 Tech Stack & Architecture
 

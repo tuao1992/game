@@ -27,6 +27,20 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
     private val rng = Random(System.nanoTime())
     private val level: Level? = if (mode == GameMode.CAREER && levelIndex >= 0) Levels.all[levelIndex] else null
     private val particles = Particles().apply { densityScale = game.save.quality.particleScale }
+    private val popups = Popups()
+
+    // Juice / feedback
+    private var combo = 0
+    private var maxCombo = 0
+    private var jointPerfects = 0
+    private var flawless = false
+    private var intro = 1.7f
+    private var introDone = false
+    private val assist = mode == GameMode.CAREER && levelIndex in 0..2 // gentle onboarding
+
+    // Per-step score accumulators (for the results breakdown)
+    private var aCut = 0f; private var aClean = 0f; private var aDebur = 0f
+    private var aCement = 0f; private var aAlign = 0f; private var aHold = 0f
 
     // Session state
     private var phase = Phase.SELECT_PIPE
@@ -173,7 +187,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
             Phase.TEST -> Loc.t("pressure_test")
         }
         when (ph) {
-            Phase.CUT -> { cutMarker = 0.08f; cutDir = 1f; cutSpeed = Geom.lerp(0.55f, 1.4f, cfg.difficulty); cutDone = false; cutHoldT = 0f }
+            Phase.CUT -> { cutMarker = 0.08f; cutDir = 1f; cutSpeed = Geom.lerp(0.55f, 1.4f, cfg.difficulty) * (if (assist) 0.7f else 1f); cutDone = false; cutHoldT = 0f }
             Phase.CLEAN -> { cleanSeg.fill(0f); cleanCover = 0f }
             Phase.DEBUR -> {
                 burrs.clear(); val count = (3 + cfg.difficulty * 3).toInt().coerceIn(3, 6)
@@ -198,11 +212,13 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
     // ---------- Update ----------
     override fun update(dt: Float) {
         particles.update(dt)
+        popups.update(dt)
         flash = (flash - dt * 3f).coerceAtLeast(0f)
         for (b in hudButtons) b.update(dt)
         if (achQueue.isNotEmpty()) { achT += dt; if (achT > 2.8f) { achQueue.removeFirst(); achT = 0f } }
         if (ended) { endT += dt; return }
         if (paused) return
+        if (intro > 0f) { intro -= dt; if (intro <= 0f && !introDone) { introDone = true; game.audio.play(Sfx.COUNT, 1.4f) }; return }
 
         phaseT += dt
         if (timeLeft > 0f && mode != GameMode.ENDLESS) {
@@ -228,7 +244,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
     private fun updateHold(dt: Float) {
         val tx = fitX - tubeR * 0.4f; val ty = pipeCY
         val inZone = ptrDown && Geom.dist(ptrX, ptrY, tx, ty) < tubeR * 3.0f
-        val holdDur = Geom.lerp(1.8f, 2.6f, cfg.difficulty)
+        val holdDur = Geom.lerp(1.8f, 2.6f, cfg.difficulty) * (if (assist) 0.7f else 1f)
         if (ptrDown) {
             holdElapsed += dt
             if (inZone) { holdProgress += dt / holdDur; holdInTime += dt }
@@ -239,6 +255,8 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
             if (holdProgress >= 1f) {
                 sHold = (0.4f + 0.6f * holdSteady).coerceIn(0f, 1f)
                 game.audio.play(Sfx.JOIN_SET); game.haptics.heavy()
+                game.shake(9f); game.hitStop(0.08f)
+                judge(sHold, tx, ty - tubeR * 3.6f)
                 nextPhase()
             }
         } else {
@@ -250,6 +268,11 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
     private fun updateTest(dt: Float) {
         if (!testComputed) { computeResult(); testComputed = true; game.audio.play(Sfx.WATER) }
         waterFill = (waterFill + dt * 0.8f).coerceAtMost(1f)
+        if (waterFill < 1f && rng.nextFloat() < 0.6f) {
+            val len = (fitX - pipeLeft) - tubeR
+            val wx = pipeLeft + len * waterFill * (0.2f + rng.nextFloat() * 0.8f)
+            particles.spray(wx, pipeCY + tubeR * 0.4f, -1.5708f, 0.5f, 1, 0x99CDEBFF.toInt(), 70f, tubeR * 0.12f, -140f, 0.6f)
+        }
         if (waterFill >= 1f) {
             testHold += dt
             if (testHold > 1.8f) afterTest()
@@ -270,6 +293,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
 
         tap(pauseBtn, e)
         if (pauseBtnFired) { pauseBtnFired = false; openPause(); afterRoute(e); return }
+        if (intro > 0f) { afterRoute(e); return }
 
         phaseTouch(e)
         afterRoute(e)
@@ -310,11 +334,15 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
 
     private fun doCut() {
         cutDone = true
-        val off = abs(cutMarker - 0.5f) / 0.42f
+        val tol = if (assist) 0.6f else 0.42f
+        val off = abs(cutMarker - 0.5f) / tol
         sCut = Geom.clamp01(1f - off * off)
         game.audio.play(Sfx.CUT); game.haptics.medium()
-        particles.spray(pipeLeft + pipeLen * cutMarker, pipeCY, 1.5708f, 1.6f, 14, 0xFFD9C9A0.toInt(), 360f, tubeR * 0.22f, 700f, 0.6f)
-        particles.spray(pipeLeft + pipeLen * cutMarker, pipeCY, -1.5708f, 1.6f, 8, 0xFFD9C9A0.toInt(), 320f, tubeR * 0.2f, 700f, 0.6f)
+        game.shake(6f); game.hitStop(0.05f)
+        val mx = pipeLeft + pipeLen * cutMarker
+        particles.spray(mx, pipeCY, 1.5708f, 1.6f, 14, 0xFFD9C9A0.toInt(), 360f, tubeR * 0.22f, 700f, 0.6f)
+        particles.spray(mx, pipeCY, -1.5708f, 1.6f, 8, 0xFFD9C9A0.toInt(), 320f, tubeR * 0.2f, 700f, 0.6f)
+        judge(sCut, mx, pipeCY - tubeR * 3f)
     }
 
     private fun paintClean(e: TouchEvent) {
@@ -330,7 +358,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
             particles.burst(e.x, pipeCY - tubeR, 2, 0xFFBCA77A.toInt(), 120f, tubeR * 0.14f, 500f, 0.4f)
         }
         cleanCover = cleanSeg.average().toFloat()
-        if (cleanCover >= 0.93f) { sClean = cleanCover; game.haptics.light(); nextPhase() }
+        if (cleanCover >= 0.93f) { sClean = cleanCover; game.haptics.light(); judge(sClean, pipeLeft + pipeLen * 0.5f, pipeCY - tubeR * 3f); nextPhase() }
     }
 
     private fun tapBurr(e: TouchEvent) {
@@ -346,7 +374,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
             burrs.removeAt(hit)
             game.audio.play(Sfx.DEBUR); game.haptics.light()
             particles.burst(pipeLeft + pipeLen, by, 6, 0xFFAEB7C2.toInt(), 200f, tubeR * 0.16f, 600f, 0.5f)
-            if (burrs.isEmpty()) { sDebur = (1f - (burrTimer / 12f)).coerceIn(0.7f, 1f); nextPhase() }
+            if (burrs.isEmpty()) { sDebur = (1f - (burrTimer / 12f)).coerceIn(0.7f, 1f); judge(sDebur, pipeLeft + pipeLen, pipeCY - tubeR * 3f); nextPhase() }
         }
     }
 
@@ -366,17 +394,20 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
             val over = (cementAmount - 2.4f).coerceAtLeast(0f)
             val overPen = (over * 0.12f).coerceAtMost(0.3f)
             sCement = (cementCover * (1f - overPen)).coerceIn(0f, 1f)
-            game.haptics.light(); nextPhase()
+            game.haptics.light(); game.shake(3f); judge(sCement, pipeLeft + pipeLen * 0.8f, pipeCY - tubeR * 3f); nextPhase()
         }
     }
 
     private fun confirmAlign() {
         val err = abs(fitAngle - fitTarget)
         sAlign = Geom.clamp01(1f - err / 45f)
-        if (err < Geom.lerp(14f, 7f, cfg.difficulty)) { fitAngle = fitTarget; game.audio.play(Sfx.ALIGN_LOCK); game.haptics.success() }
+        if (err < alignTol()) { fitAngle = fitTarget; game.audio.play(Sfx.ALIGN_LOCK); game.haptics.success(); game.shake(4f) }
         else { game.audio.play(Sfx.SELECT); game.haptics.light() }
+        judge(sAlign, fitX, pipeCY - tubeR * 4f)
         nextPhase()
     }
+
+    private fun alignTol(): Float = Geom.lerp(14f, 7f, cfg.difficulty) + if (assist) 8f else 0f
 
     private fun wrong() {
         flash = 1f; game.audio.play(Sfx.ERROR); game.haptics.error()
@@ -394,19 +425,48 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
             else -> JointResult.MAJOR_LEAK
         }
         levelQualitySum += q
-        val pts = (q * 100).toInt() + when (result) { JointResult.PERFECT -> 50; JointResult.MINOR_LEAK -> 10; else -> 0 }
-        totalScore += pts
+        aCut += sCut; aClean += sClean; aDebur += sDebur; aCement += sCement; aAlign += sAlign; aHold += sHold
         if (result != JointResult.PERFECT) anyLeak = true
         if (result == JointResult.MAJOR_LEAK) anyMajorLeak = true
+        if (result == JointResult.PERFECT) { combo++; if (combo > maxCombo) maxCombo = combo } else combo = 0
+        val mult = (1f + 0.15f * (combo - 1).coerceAtLeast(0)).coerceIn(1f, 2.5f)
+        val base = (q * 100).toInt() + when (result) { JointResult.PERFECT -> 50; JointResult.MINOR_LEAK -> 10; else -> 0 }
+        val pts = (base * mult).toInt()
+        totalScore += pts
         game.save.recordJoint(result == JointResult.PERFECT)
+        if (result == JointResult.PERFECT) jointPerfects++
+
+        val cx = w / 2f; val cy = pipeCY - tubeR * 2.6f
         when (result) {
-            JointResult.PERFECT -> { game.audio.play(Sfx.PERFECT); game.haptics.success() }
-            JointResult.MINOR_LEAK -> { game.audio.play(Sfx.SUCCESS) }
-            JointResult.MAJOR_LEAK -> { game.audio.play(Sfx.LEAK); game.haptics.error() }
+            JointResult.PERFECT -> {
+                game.audio.play(Sfx.PERFECT, (1f + combo * 0.05f).coerceAtMost(1.6f)); game.haptics.success()
+                game.shake(11f + combo * 1.5f); game.hitStop(0.10f)
+                popups.add(Loc.t("perfect_joint"), cx, cy, Palette.GREEN, p.dp(56f))
+                particles.confetti(cx, pipeCY, 26 + combo * 6, intArrayOf(Palette.BLUE_LIGHT, Palette.WHITE, Palette.RED, Palette.AMBER))
+                if (combo >= 2) { popups.add("COMBO x$combo", cx, cy + p.dp(62f), Palette.AMBER, p.dp(48f)); game.audio.play(Sfx.STAR, (1f + combo * 0.06f).coerceAtMost(1.8f)) }
+            }
+            JointResult.MINOR_LEAK -> {
+                game.audio.play(Sfx.SUCCESS); game.haptics.medium(); game.shake(4f)
+                popups.add(Loc.t("minor_leak"), cx, cy, Palette.AMBER, p.dp(48f))
+                if (q >= 0.72f) popups.add("SO CLOSE!", cx, cy + p.dp(56f), Palette.WHITE, p.dp(40f))
+            }
+            JointResult.MAJOR_LEAK -> {
+                game.audio.play(Sfx.LEAK); game.haptics.error(); game.shake(14f); game.hitStop(0.06f)
+                popups.add(Loc.t("major_leak"), cx, cy, Palette.RED, p.dp(50f))
+                if (q >= 0.5f) popups.add("ALMOST!", cx, cy + p.dp(56f), Palette.OFFWHITE, p.dp(38f))
+            }
         }
-        if (result == JointResult.PERFECT) {
-            particles.confetti(w / 2f, pipeCY, 30, intArrayOf(Palette.BLUE_LIGHT, Palette.WHITE, Palette.RED, Palette.AMBER))
+        popups.add("+$pts", cx, cy + p.dp(112f), Palette.WHITE, p.dp(42f))
+    }
+
+    private fun judge(v: Float, x: Float, y: Float) {
+        val (txt, col) = when {
+            v >= 0.9f -> "PERFECT" to Palette.GREEN
+            v >= 0.72f -> "GREAT" to Palette.BLUE_LIGHT
+            v >= 0.5f -> "GOOD" to Palette.WHITE
+            else -> "OK" to Palette.AMBER
         }
+        popups.add(txt, x, y, col, p.dp(40f), 0.9f)
     }
 
     private fun afterTest() {
@@ -430,6 +490,8 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
     private fun finishLevel() {
         val avgQ = if (jointsDone > 0) levelQualitySum / jointsDone else 0f
         endStars = when { avgQ >= 0.8f && !anyMajorLeak -> 3; avgQ >= 0.58f -> 2; else -> 1 }
+        flawless = jointPerfects == jointsDone && jointsDone >= 2
+        if (flawless) totalScore += 250
         val prevRank = game.save.rank
         game.save.recordCareerResult(levelIndex, endStars, leakFree = !anyLeak)
         if (game.save.rank != prevRank) unlockedRank = game.save.rank
@@ -503,18 +565,37 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
 
     // ---------- Render ----------
     override fun render(c: Canvas) {
-        Decor.workshop(p, c, phaseT)
+        Decor.workshop(p, c, phaseT, level?.environment?.accent ?: 0xFF13486F.toInt())
         p.rect(c, 0f, 0f, w, h, 0x22000000)
         if (flash > 0f) p.rect(c, 0f, 0f, w, h, Painter.withAlpha(Palette.RED, (flash * 90).toInt()))
 
         renderStage(c)
         particles.render(p, c)
+        p.vignette(c, 60)
         renderHud(c)
         renderPhaseUi(c)
+        popups.render(p, c)
 
+        if (intro > 0f) renderIntro(c)
         if (paused) renderPause(c)
         if (ended) renderEnd(c)
         renderAchToast(c)
+    }
+
+    private fun renderIntro(c: Canvas) {
+        p.rect(c, 0f, 0f, w, h, 0x99000000.toInt())
+        val cx = w / 2f
+        Decor.cementCan(p, c, cx, h * 0.32f, p.dp(0.7f), glow = true)
+        p.text(c, modeTitle(), cx, h * 0.5f, p.dp(40f), Palette.BLUE_LIGHT)
+        level?.let { p.text(c, it.name, cx, h * 0.56f, p.dp(34f), Palette.WHITE) }
+        if (intro > 0.55f) {
+            p.textCentered(c, "GET READY", cx, h * 0.66f, p.dp(64f), Palette.WHITE)
+        } else {
+            val sc = Geom.easeOutBack(((0.55f - intro) / 0.3f).coerceIn(0f, 1f))
+            c.save(); c.scale(sc, sc, cx, h * 0.66f)
+            p.textCentered(c, Loc.t("go"), cx, h * 0.66f, p.dp(80f), Palette.GREEN)
+            c.restore()
+        }
     }
 
     private fun heart(c: Canvas, cx: Float, cy: Float, r: Float) {
@@ -581,12 +662,15 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
         // score / joints right-ish
         val rightX = w - p.dp(120f)
         p.text(c, scoreLabel(), rightX, h * 0.05f, p.dp(30f), Palette.AMBER, Paint.Align.RIGHT)
+        if (combo >= 2) p.text(c, "x$combo COMBO", rightX, h * 0.086f, p.dp(24f), Palette.GREEN, Paint.Align.RIGHT, bold = false)
         // small can branding
         Decor.cementCan(p, c, p.dp(46f), h * 0.205f, p.dp(0.32f))
         pauseBtn.draw(p, c)
-        // instruction
-        p.text(c, instruction, w / 2f, h * 0.16f, p.dp(36f), Palette.WHITE)
-        p.text(c, stepLabel(), w / 2f, h * 0.205f, p.dp(24f), Palette.BLUE_LIGHT, bold = false)
+        // instruction with contrast backing
+        val iw = p.textWidth(instruction, p.dp(36f)) + p.dp(54f)
+        p.rrect(c, RectF(w / 2f - iw / 2, h * 0.138f, w / 2f + iw / 2, h * 0.189f), 0x66000000, p.dp(26f))
+        p.text(c, instruction, w / 2f, h * 0.173f, p.dp(36f), Palette.WHITE)
+        p.text(c, stepLabel(), w / 2f, h * 0.215f, p.dp(24f), Palette.BLUE_LIGHT, bold = false)
     }
 
     private fun renderPhaseUi(c: Canvas) {
@@ -683,7 +767,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
         p.fillPath(c, ap, Palette.GREEN)
         p.text(c, "ALIGN SOCKET", tx + p.dp(36f), ay + p.dp(9f), p.dp(24f), Palette.GREEN, Paint.Align.LEFT, bold = false)
         val err = abs(fitAngle - fitTarget)
-        val good = err < Geom.lerp(14f, 7f, cfg.difficulty)
+        val good = err < alignTol()
         p.text(c, "${err.toInt()}°", tx, ty - tubeR * 4.2f, p.dp(34f), if (good) Palette.GREEN else Palette.WHITE)
         cta.label = Loc.t("confirm"); cta.style = if (good) BtnStyle.SUCCESS else BtnStyle.PRIMARY
         cta.draw(p, c)
@@ -735,11 +819,14 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
         val cx = w / 2f
         if (mode == GameMode.CAREER && !endFailed) {
             p.text(c, "${Loc.t("level")} ${levelIndex + 1}", cx, h * 0.18f, p.dp(40f), Palette.OFFWHITE, bold = false)
-            p.text(c, if (endStars == 3) Loc.t("perfect_joint") else "COMPLETE!", cx, h * 0.25f, p.dp(54f), Palette.WHITE)
+            p.text(c, if (flawless) "FLAWLESS!" else if (endStars == 3) "EXCELLENT!" else "COMPLETE!", cx, h * 0.25f, p.dp(54f), if (flawless) Palette.AMBER else Palette.WHITE)
             val pop = Geom.easeOutBack((endT * 1.4f).coerceIn(0f, 1f))
             Decor.starRow(p, c, cx, h * 0.36f, p.dp(90f) * (0.6f + pop * 0.4f), endStars, 3, p.dp(120f))
+            val acc = if (jointsDone > 0) (levelQualitySum / jointsDone * 100).toInt() else 0
+            p.text(c, "Accuracy $acc%", cx, h * 0.455f, p.dp(32f), Palette.OFFWHITE, bold = false)
             p.text(c, "${Loc.t("score")}: $totalScore", cx, h * 0.5f, p.dp(40f), Palette.AMBER)
-            unlockedRank?.let { p.text(c, "${Loc.t("unlocked_rank")} ${it.title}", cx, h * 0.55f, p.dp(30f), Palette.BLUE_LIGHT) }
+            if (maxCombo >= 2) p.text(c, "Best combo x$maxCombo", cx, h * 0.54f, p.dp(28f), Palette.GREEN, bold = false)
+            unlockedRank?.let { p.text(c, "${Loc.t("unlocked_rank")} ${it.title}", cx, h * 0.578f, p.dp(28f), Palette.BLUE_LIGHT) }
             nextB.label = Loc.t("next"); retryB.label = Loc.t("retry"); menuB.label = Loc.t("menu")
             nextB.visible = levelIndex + 1 < Levels.all.size
             nextB.draw(p, c); retryB.draw(p, c); menuB.draw(p, c)
@@ -753,7 +840,8 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
             p.text(c, if (mode == GameMode.TIME_ATTACK) Loc.t("time_up") else Loc.t("major_leak"), cx, h * 0.22f, p.dp(54f), if (mode == GameMode.TIME_ATTACK) Palette.AMBER else Palette.RED)
             p.text(c, "${Loc.t("joints")}: $jointsDone", cx, h * 0.34f, p.dp(56f), Palette.WHITE)
             p.text(c, "${Loc.t("score")}: $totalScore", cx, h * 0.42f, p.dp(36f), Palette.AMBER)
-            if (newBest) p.text(c, Loc.t("new_best"), cx, h * 0.49f, p.dp(40f), Palette.GREEN)
+            if (maxCombo >= 2) p.text(c, "Best combo x$maxCombo", cx, h * 0.475f, p.dp(28f), Palette.GREEN, bold = false)
+            if (newBest) p.text(c, Loc.t("new_best"), cx, h * 0.525f, p.dp(40f), Palette.GREEN)
             retryB.label = Loc.t("retry"); menuB.label = Loc.t("menu")
             nextB.visible = false
             retryB.draw(p, c); menuB.draw(p, c)

@@ -31,6 +31,21 @@ class Game(val context: Context, val host: GameHost) {
     private val stack = ArrayDeque<Screen>()
     private var booted = false
 
+    // Juice: screen shake + hit-stop (freeze-frame)
+    private var shakeAmp = 0f
+    private var hitStopT = 0f
+    private val fxRng = kotlin.random.Random(System.nanoTime())
+
+    /** Request a screen shake; [px] is design-space amplitude (scaled to device + quality). */
+    fun shake(px: Float) {
+        val q = painter.quality.particleScale.coerceIn(0.5f, 1.3f) // Low quality ≈ reduce-motion
+        val a = (px * painter.u * q).coerceAtMost(painter.u * 20f)
+        if (a > shakeAmp) shakeAmp = a
+    }
+
+    /** Freeze gameplay for [sec] seconds to punch up an impactful moment. */
+    fun hitStop(sec: Float) { if (sec > hitStopT) hitStopT = sec }
+
     // Cross-fade: 0 = idle, 1 = fading out (then run pendingNav), -1 = fading in
     private var transDir = 0
     private var transA = 0f
@@ -40,6 +55,7 @@ class Game(val context: Context, val host: GameHost) {
     init {
         Loc.language = save.language
         refreshSettings()
+        save.touchDailyStreak()
     }
 
     val current: Screen? get() = stack.lastOrNull()
@@ -66,12 +82,21 @@ class Game(val context: Context, val host: GameHost) {
 
     fun update(dt: Float) {
         updateTransition(dt)
-        current?.update(dt)
+        if (hitStopT > 0f) hitStopT -= dt else current?.update(dt)
+        if (shakeAmp > 0.3f) shakeAmp -= shakeAmp * (dt * 10f).coerceAtMost(1f) else shakeAmp = 0f
     }
 
     fun render(c: Canvas) {
         val s = current
-        if (s != null) s.render(c) else c.drawColor(Color.parseColor("#0E2A47"))
+        if (s != null) {
+            if (shakeAmp > 0.3f) {
+                c.drawColor(0xFF0E2A47.toInt()) // brand fill so shaken edges never show black
+                c.save()
+                c.translate((fxRng.nextFloat() - 0.5f) * 2f * shakeAmp, (fxRng.nextFloat() - 0.5f) * 2f * shakeAmp)
+                s.render(c)
+                c.restore()
+            } else s.render(c)
+        } else c.drawColor(Color.parseColor("#0E2A47"))
         if (transA > 0f) {
             c.drawColor((((transA * 255).toInt().coerceIn(0, 255)) shl 24))
         }

@@ -33,6 +33,20 @@ class Painter(var w: Int, var h: Int, var quality: Quality) {
     // ---- Background ----
     fun clear(c: Canvas, color: Int) = c.drawColor(color)
 
+    /** Subtle radial darkening at the edges for focus and contrast. */
+    fun vignette(c: Canvas, alpha: Int) {
+        val cx = w / 2f; val cy = h / 2f
+        val rad = (if (w > h) w else h) * 0.72f
+        fill.shader = android.graphics.RadialGradient(
+            cx, cy, rad,
+            intArrayOf(0x00000000, withAlpha(0xFF000000.toInt(), alpha)),
+            floatArrayOf(0.55f, 1f), android.graphics.Shader.TileMode.CLAMP
+        )
+        fill.style = Paint.Style.FILL
+        c.drawRect(0f, 0f, w.toFloat(), h.toFloat(), fill)
+        fill.shader = null
+    }
+
     /** Vertical two-tone backdrop used across the game. */
     fun backdrop(c: Canvas, top: Int, bottom: Int) {
         val mid = h / 2f

@@ -74,10 +74,10 @@ class TutorialScreen(
                 val tx = fitX - tubeR * 0.4f
                 if (ptrDown && Geom.dist(ptrX, ptrY, tx, pipeCY) < tubeR * 3f) {
                     holdProgress = (holdProgress + dt / 1.6f).coerceAtMost(1f)
-                    if (holdProgress >= 1f && !stageDone) { stageDone = true; game.audio.play(Sfx.JOIN_SET); game.haptics.heavy(); advanceSoon() }
+                    if (holdProgress >= 1f && !stageDone) { stageDone = true; game.audio.play(Sfx.JOIN_SET); game.haptics.heavy(); game.shake(9f); game.hitStop(0.08f); advanceSoon() }
                 } else holdProgress = (holdProgress - dt * 0.5f).coerceAtLeast(0f)
             }
-            4 -> if (testRun) { waterFill = (waterFill + dt * 0.7f).coerceAtMost(1f); if (waterFill >= 1f && !stageDone) { stageDone = true; game.audio.play(Sfx.PERFECT); particles.confetti(w / 2f, pipeCY, 30, intArrayOf(Palette.BLUE_LIGHT, Palette.WHITE, Palette.RED, Palette.AMBER)) } }
+            4 -> if (testRun) { waterFill = (waterFill + dt * 0.7f).coerceAtMost(1f); if (waterFill >= 1f && !stageDone) { stageDone = true; game.audio.play(Sfx.PERFECT); game.shake(10f); game.hitStop(0.08f); particles.confetti(w / 2f, pipeCY, 30, intArrayOf(Palette.BLUE_LIGHT, Palette.WHITE, Palette.RED, Palette.AMBER)) } }
         }
         // action button visibility
         action.visible = when (stage) {
@@ -112,6 +112,7 @@ class TutorialScreen(
         when (stage) {
             0 -> if (e.kind == TouchEvent.Kind.DOWN && !stageDone) {
                 stageDone = true; game.audio.play(Sfx.CUT); game.haptics.medium()
+                game.shake(6f); game.hitStop(0.05f)
                 particles.spray(pipeLeft + pipeLen * marker, pipeCY, 1.5708f, 1.6f, 14, 0xFFD9C9A0.toInt(), 360f, tubeR * 0.22f, 700f, 0.6f)
             }
             1 -> if (e.kind != TouchEvent.Kind.UP) paintCement(e)

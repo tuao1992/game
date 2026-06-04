@@ -15,8 +15,9 @@ import kotlin.math.sin
 object Decor {
 
     // ---- Workshop backdrop: pegboard wall + tools + workbench ----
-    fun workshop(p: Painter, c: Canvas, time: Float) {
-        p.backdrop(c, 0xFF13486F.toInt(), Palette.BLUE_DARK)
+    fun workshop(p: Painter, c: Canvas, time: Float, accent: Int = 0xFF13486F.toInt()) {
+        val top = Painter.mix(0xFF13486F.toInt(), accent, 0.4f)
+        p.backdrop(c, top, Palette.BLUE_DARK)
         val w = p.w.toFloat(); val h = p.h.toFloat()
 
         // Pegboard holes (subtle), density by quality

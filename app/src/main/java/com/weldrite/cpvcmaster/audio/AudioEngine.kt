@@ -73,9 +73,16 @@ class AudioEngine {
         synchronized(voices) { voices.clear() }
     }
 
-    fun play(sfx: Sfx) {
+    fun play(sfx: Sfx) = play(sfx, 1f)
+
+    /** Play an SFX with an optional [pitch] multiplier (e.g. rising with combos). */
+    fun play(sfx: Sfx, pitch: Float) {
         if (!sfxEnabled || !running) return
-        synchronized(voices) { build(sfx) }
+        synchronized(voices) {
+            val start = voices.size
+            build(sfx)
+            if (pitch != 1f) for (i in start until voices.size) voices[i].scaleHz(pitch)
+        }
     }
 
     private fun loop() {
@@ -86,6 +93,7 @@ class AudioEngine {
         while (running) {
             java.util.Arrays.fill(f, 0f)
             advanceMusic(n)
+            if (musicEnabled) addAmbient(f, n)
             synchronized(voices) {
                 var i = 0
                 while (i < voices.size) {
@@ -148,6 +156,24 @@ class AudioEngine {
 
     private fun hz(semi: Int): Double = baseHz * Math.pow(2.0, semi / 12.0)
 
+    // Gentle, slowly-pulsing low pad — a "felt not heard" workshop soundscape.
+    private var ambP1 = 0.0
+    private var ambP2 = 0.0
+    private var ambLfo = 0.0
+    private fun addAmbient(f: FloatArray, n: Int) {
+        val inc1 = 98.0 / sr       // G2
+        val inc2 = 146.83 / sr     // D3 (a fifth up)
+        var k = 0
+        while (k < n) {
+            ambP1 += inc1; if (ambP1 >= 1.0) ambP1 -= 1.0
+            ambP2 += inc2; if (ambP2 >= 1.0) ambP2 -= 1.0
+            ambLfo += 0.11 / sr; if (ambLfo >= 1.0) ambLfo -= 1.0
+            val trem = 0.6f + 0.4f * ((sin(ambLfo * TWO_PI) + 1.0) * 0.5f).toFloat()
+            f[k] += ((sin(ambP1 * TWO_PI) + 0.7 * sin(ambP2 * TWO_PI)).toFloat()) * 0.014f * trem
+            k++
+        }
+    }
+
     // ---- SFX builders (added under `voices` lock) ----
     private fun build(sfx: Sfx) {
         when (sfx) {
@@ -208,6 +234,8 @@ class AudioEngine {
         var glide = 0.0        // Hz change per full duration (for falling tones)
 
         val done: Boolean get() = delayLeft <= 0 && left <= 0
+
+        fun scaleHz(f: Float) { hz *= f }
 
         fun next(): Float {
             if (delayLeft > 0) { delayLeft--; return 0f }

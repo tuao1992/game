@@ -31,6 +31,8 @@ class SaveManager(context: Context) {
     var bestTimeAttack = 0
     var bestEndless = 0
     var tutorialDone = false
+    var dailyStreak = 0
+    private var lastPlayDay = 0L
 
     private val seenAchievements = linkedSetOf<String>()
 
@@ -101,6 +103,18 @@ class SaveManager(context: Context) {
     fun applyQuality(q: Quality) { quality = q; flush() }
     fun markTutorialDone() { tutorialDone = true; flush() }
 
+    /** Updates the daily-play streak. Call once per app launch. */
+    fun touchDailyStreak() {
+        val day = System.currentTimeMillis() / 86_400_000L
+        when {
+            day == lastPlayDay -> {}
+            day == lastPlayDay + 1 -> dailyStreak++
+            else -> dailyStreak = 1
+        }
+        lastPlayDay = day
+        flush()
+    }
+
     // ---- Persistence ----
     private fun load() {
         val raw = prefs.getString("data", null) ?: run { Loc.language = language; return }
@@ -117,6 +131,8 @@ class SaveManager(context: Context) {
             bestEndless = o.optInt("bestEndless")
             leakFreeMask = o.optLong("leakFreeMask")
             tutorialDone = o.optBoolean("tutorialDone")
+            dailyStreak = o.optInt("streak")
+            lastPlayDay = o.optLong("lastDay")
             o.optJSONArray("stars")?.let { arr ->
                 for (i in 0 until minOf(arr.length(), levelCount)) stars[i] = arr.optInt(i)
             }
@@ -142,6 +158,8 @@ class SaveManager(context: Context) {
         o.put("bestEndless", bestEndless)
         o.put("leakFreeMask", leakFreeMask)
         o.put("tutorialDone", tutorialDone)
+        o.put("streak", dailyStreak)
+        o.put("lastDay", lastPlayDay)
         o.put("stars", JSONArray().apply { stars.forEach { put(it) } })
         o.put("seenAch", JSONArray().apply { seenAchievements.forEach { put(it) } })
         prefs.edit().putString("data", o.toString()).apply()

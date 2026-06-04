@@ -96,12 +96,41 @@ class MenuScreen(game: Game) : Screen(game) {
         p.text(c, "★ ${game.save.totalStars}   •   ${game.save.completedLevels}/${game.save.stars.size} ${Loc.t("level")}s",
             cx - w * 0.18f, py + p.dp(34f), p.dp(26f), Palette.OFFWHITE, android.graphics.Paint.Align.LEFT, bold = false)
 
+        // Daily streak chip, top-right
+        if (game.save.dailyStreak >= 1) {
+            val r = android.graphics.RectF(w * 0.60f, h * 0.05f, w * 0.95f, h * 0.05f + p.dp(58f))
+            p.panel(c, r, Palette.PANEL, p.dp(28f))
+            flame(c, r.left + p.dp(36f), r.centerY(), p.dp(20f))
+            val days = game.save.dailyStreak
+            p.text(c, "$days day${if (days == 1) "" else "s"}", r.left + p.dp(64f), r.centerY() + p.dp(9f), p.dp(24f), Palette.WHITE, android.graphics.Paint.Align.LEFT, bold = false)
+        }
+
         // Cement can prop, lower-right
         Decor.cementCan(p, c, w * 0.86f, h * 0.9f, p.dp(0.62f))
 
         drawButtons(c)
 
         p.text(c, Loc.t("slogan2"), cx, h * 0.975f, p.dp(24f), Palette.BLUE_LIGHT, alpha = 200)
+    }
+
+    private fun flame(c: android.graphics.Canvas, cx: Float, cy: Float, r: Float) {
+        val outer = p.path { pa ->
+            pa.moveTo(cx, cy - r * 1.3f)
+            pa.quadTo(cx + r, cy - r * 0.2f, cx + r * 0.8f, cy + r * 0.4f)
+            pa.quadTo(cx + r * 0.8f, cy + r * 1.2f, cx, cy + r * 1.2f)
+            pa.quadTo(cx - r * 0.8f, cy + r * 1.2f, cx - r * 0.8f, cy + r * 0.4f)
+            pa.quadTo(cx - r, cy - r * 0.2f, cx, cy - r * 1.3f)
+            pa.close()
+        }
+        p.fillPath(c, outer, Palette.RED)
+        val inner = p.path { pa ->
+            pa.moveTo(cx, cy - r * 0.5f)
+            pa.quadTo(cx + r * 0.5f, cy + r * 0.1f, cx + r * 0.35f, cy + r * 0.6f)
+            pa.quadTo(cx, cy + r * 0.9f, cx - r * 0.35f, cy + r * 0.6f)
+            pa.quadTo(cx - r * 0.5f, cy + r * 0.1f, cx, cy - r * 0.5f)
+            pa.close()
+        }
+        p.fillPath(c, inner, Palette.AMBER)
     }
 
     override fun onBack(): Boolean { game.host.exitToBackground(); return true }
