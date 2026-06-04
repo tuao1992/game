@@ -182,7 +182,7 @@ class TutorialScreen(
                 p.text(c, if (stageDone) "Great!" else "TAP TO CUT", w / 2f, h * 0.72f, p.dp(34f), if (stageDone) Palette.GREEN else Palette.WHITE)
             }
             1 -> {
-                Decor.cementCan(p, c, w * 0.85f, h * 0.38f, p.dp(0.6f), glow = true)
+                Decor.cementCan(p, c, w * 0.85f, h * 0.38f, p.dp(0.6f), glow = true, bmp = game.images.cementCan())
                 PipeRenderer.pipe(p, c, pipeLeft, pipeCY, pipeLen, tubeR, printed = "3/4\" CPVC", cementAmt = cementCover)
                 if (ptrDown) p.circle(c, ptrX, ptrY, tubeR * 0.45f, 0xCC8FCAFF.toInt())
                 bar(c, Loc.t("coverage"), cementCover)

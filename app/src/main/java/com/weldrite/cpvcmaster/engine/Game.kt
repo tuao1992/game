@@ -26,6 +26,7 @@ class Game(val context: Context, val host: GameHost) {
     val save = SaveManager(context)
     val audio = AudioEngine()
     val haptics = Haptics(context)
+    val images = Images(context)
     var painter = Painter(1, 1, save.quality)
 
     private val stack = ArrayDeque<Screen>()

@@ -86,7 +86,7 @@ class MenuScreen(game: Game) : Screen(game) {
         p.rect(c, 0f, 0f, w, h, 0x22000000)
         val cx = w / 2f
 
-        Decor.logo(p, c, cx, h * 0.13f, p.dp(70f))
+        Decor.logo(p, c, cx, h * 0.13f, p.dp(70f), bmp = game.images.logo())
 
         // Rank summary panel
         val rank = game.save.rank
@@ -106,7 +106,7 @@ class MenuScreen(game: Game) : Screen(game) {
         }
 
         // Cement can prop, lower-right
-        Decor.cementCan(p, c, w * 0.86f, h * 0.9f, p.dp(0.62f))
+        Decor.cementCan(p, c, w * 0.86f, h * 0.9f, p.dp(0.62f), bmp = game.images.cementCan())
 
         drawButtons(c)
 

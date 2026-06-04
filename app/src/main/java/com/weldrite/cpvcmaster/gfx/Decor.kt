@@ -1,5 +1,6 @@
 package com.weldrite.cpvcmaster.gfx
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
@@ -98,7 +99,13 @@ object Decor {
     }
 
     // ---- Weldrite solvent cement can (branding prop) ----
-    fun cementCan(p: Painter, c: Canvas, cx: Float, cy: Float, scale: Float, glow: Boolean = false) {
+    fun cementCan(p: Painter, c: Canvas, cx: Float, cy: Float, scale: Float, glow: Boolean = false, bmp: Bitmap? = null) {
+        if (bmp != null) {
+            val maxW = 178f * scale; val maxH = 222f * scale
+            if (glow) p.circle(c, cx, cy, maxW * 0.74f, 0x2242A5F5)
+            p.image(c, bmp, cx, cy, maxW, maxH)
+            return
+        }
         val bw = 150f * scale; val bh = 188f * scale
         val body = RectF(cx - bw / 2, cy - bh / 2, cx + bw / 2, cy + bh / 2)
         if (glow) p.circle(c, cx, cy, bw * 0.9f, 0x2242A5F5)
@@ -120,7 +127,12 @@ object Decor {
     }
 
     // ---- Logo wordmark ----
-    fun logo(p: Painter, c: Canvas, cx: Float, cy: Float, size: Float) {
+    fun logo(p: Painter, c: Canvas, cx: Float, cy: Float, size: Float, bmp: Bitmap? = null) {
+        if (bmp != null) {
+            p.image(c, bmp, cx, cy, size * 7.4f, size * 2.0f)
+            p.textCentered(c, "C P V C   M A S T E R", cx, cy + size * 1.15f, size * 0.34f, Palette.BLUE_LIGHT)
+            return
+        }
         // "WELDRITE" with a red CPVC-pipe accent crossing the W
         val w = p.textWidth("WELDRITE", size)
         p.text(c, "WELDRITE", cx, cy, size, Palette.WHITE)

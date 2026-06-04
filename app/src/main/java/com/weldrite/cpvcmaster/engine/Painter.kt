@@ -1,5 +1,6 @@
 package com.weldrite.cpvcmaster.engine
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -24,6 +25,7 @@ class Painter(var w: Int, var h: Int, var quality: Quality) {
     private val bold = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
     private val regular = Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL)
     private val tmp = RectF()
+    private val bmpPaint = Paint(Paint.FILTER_BITMAP_FLAG or Paint.ANTI_ALIAS_FLAG)
 
     val u: Float get() = w / 1080f
     fun dp(v: Float): Float = v * u
@@ -102,6 +104,18 @@ class Painter(var w: Int, var h: Int, var quality: Quality) {
         stroke.color = color; stroke.strokeWidth = width; stroke.style = Paint.Style.STROKE
         tmp.set(cx - r, cy - r, cx + r, cy + r)
         c.drawArc(tmp, startDeg, sweepDeg, false, stroke)
+    }
+
+    // ---- Bitmaps ----
+    /** Draws [bmp] centred on (cx,cy), scaled to fit within maxW×maxH preserving aspect. */
+    fun image(c: Canvas, bmp: Bitmap, cx: Float, cy: Float, maxW: Float, maxH: Float, alpha: Int = 255) {
+        val bw = bmp.width; val bh = bmp.height
+        if (bw <= 0 || bh <= 0) return
+        val s = minOf(maxW / bw, maxH / bh)
+        val w = bw * s; val h = bh * s
+        tmp.set(cx - w / 2f, cy - h / 2f, cx + w / 2f, cy + h / 2f)
+        bmpPaint.alpha = alpha.coerceIn(0, 255)
+        c.drawBitmap(bmp, null, tmp, bmpPaint)
     }
 
     // ---- Text ----

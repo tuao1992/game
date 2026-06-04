@@ -7,9 +7,11 @@ CPVC pipes and fittings with **Weldrite** solvent cement. Prepare the pipe, lay
 down an even coat of cement, align the fitting, hold the joint until it sets,
 then run a pressure test — and chase a perfect, leak‑free score.
 
-The whole game is **original** — every pipe, fitting, cement can, sound effect
-and music note is generated in code. There are **no third‑party assets**, no
-network calls, no ads, and no in‑app purchases.
+The gameplay art (pipes, fittings, water, UI) and all audio are **generated in
+code**. The official **Weldrite logo and CPVC‑456 product image** are bundled in
+`assets/weldrite/` and used with the brand owner's authorization for this
+branded title. The game makes no network calls and has no ads or in‑app
+purchases.
 
 ---
 
@@ -49,8 +51,8 @@ network calls, no ads, and no in‑app purchases.
 - **Polished, family‑friendly visuals** in the Weldrite palette (blue / white /
   red), all vector‑drawn.
 - **Local save**, **haptic feedback**, immersive full‑screen, 60 FPS target.
-- **Tiny footprint**: the signed release APK is well under **1 MB** (limit was
-  150 MB).
+- **Tiny footprint**: the signed release APK is **~1.2 MB** including the bundled
+  brand images (limit was 150 MB).
 
 ---
 
@@ -301,8 +303,8 @@ All 17 tests pass.
   Quality** setting scales particle density and background detail for lower‑end
   devices.
 - Single‑threaded game state with a lock‑free hot path.
-- **Signed release APK: well under 1 MB** (no bundled media), against the 150 MB
-  limit.
+- **Signed release APK: ~1.2 MB** (the only bundled media is the Weldrite logo
+  and product image), against the 150 MB limit.
 
 ---
 
@@ -312,8 +314,8 @@ The brief listed Unity as the *preferred* engine but explicitly allowed
 **“Kotlin (Android Studio) or Unity C#.”** This project takes the Kotlin /
 Android Studio route with a purpose‑built 2D engine. The benefits:
 
-- **100% original, code‑generated art and audio** — no licensing concerns and no
-  large binary assets.
+- **Code‑generated gameplay art and audio**, plus the official **Weldrite brand
+  assets** (logo + product image) bundled with the brand owner's authorization.
 - A **tiny, fast, fully offline** APK that installs and runs on any Android 10+
   device with no extra setup.
 - Clean, dependency‑light, readable architecture.
@@ -325,6 +327,8 @@ fittings) rather than photoreal 3D.
 
 ## 📄 License
 
-All code and assets in this repository are original and created for this
-project. **“Weldrite”** is used here as a **fictional in‑game product/brand** for
-gameplay and theming purposes.
+All source code, gameplay art and audio in this repository are original and
+created for this project. The **Weldrite** name, logo and product imagery in
+`assets/weldrite/` are the property of their owner and are included in this
+branded title **with the brand owner's authorization**; they are not covered by
+the project's own license and should not be reused without permission.
