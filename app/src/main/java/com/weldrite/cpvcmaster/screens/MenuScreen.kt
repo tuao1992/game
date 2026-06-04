@@ -106,7 +106,7 @@ class MenuScreen(game: Game) : Screen(game) {
         }
 
         // Cement can prop, lower-right
-        Decor.cementCan(p, c, w * 0.86f, h * 0.9f, p.dp(0.62f), bmp = game.images.cementCan())
+        Decor.cementCan(p, c, w * 0.83f, h * 0.88f, p.dp(0.92f), bmp = game.images.cementCan())
 
         drawButtons(c)
 

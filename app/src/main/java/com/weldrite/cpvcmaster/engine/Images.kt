@@ -15,7 +15,7 @@ class Images(private val context: Context) {
     private val cache = HashMap<String, Bitmap?>()
 
     fun logo(): Bitmap? = get("logo.png", 1100)
-    fun cementCan(): Bitmap? = get("cement_can.png", 700)
+    fun cementCan(): Bitmap? = get("cement_can.png", 1200)
 
     @Synchronized
     fun get(name: String, maxDim: Int): Bitmap? {

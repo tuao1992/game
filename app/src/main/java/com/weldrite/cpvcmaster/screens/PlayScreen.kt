@@ -587,7 +587,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
     private fun renderIntro(c: Canvas) {
         p.rect(c, 0f, 0f, w, h, 0x99000000.toInt())
         val cx = w / 2f
-        Decor.cementCan(p, c, cx, h * 0.32f, p.dp(0.7f), glow = true, bmp = game.images.cementCan())
+        Decor.cementCan(p, c, cx, h * 0.32f, p.dp(0.98f), glow = true, bmp = game.images.cementCan())
         p.text(c, modeTitle(), cx, h * 0.5f, p.dp(40f), Palette.BLUE_LIGHT)
         level?.let { p.text(c, it.name, cx, h * 0.56f, p.dp(34f), Palette.WHITE) }
         if (intro > 0.55f) {
@@ -670,7 +670,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
         p.text(c, scoreLabel(), rightX, h * 0.05f, p.dp(30f), Palette.AMBER, Paint.Align.RIGHT)
         if (combo >= 2) p.text(c, "x$combo COMBO", rightX, h * 0.086f, p.dp(24f), Palette.GREEN, Paint.Align.RIGHT, bold = false)
         // small can branding
-        Decor.cementCan(p, c, p.dp(46f), h * 0.205f, p.dp(0.32f), bmp = game.images.cementCan())
+        Decor.cementCan(p, c, p.dp(52f), h * 0.21f, p.dp(0.42f), bmp = game.images.cementCan())
         pauseBtn.draw(p, c)
         // instruction with contrast backing
         val iw = p.textWidth(instruction, p.dp(36f)) + p.dp(54f)
@@ -755,7 +755,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
 
     private fun drawCement(c: Canvas) {
         // big Weldrite can prop
-        Decor.cementCan(p, c, w * 0.84f, h * 0.36f, p.dp(0.7f), glow = true, bmp = game.images.cementCan())
+        Decor.cementCan(p, c, w * 0.82f, h * 0.36f, p.dp(1.05f), glow = true, bmp = game.images.cementCan())
         // brush cursor
         if (ptrDown) {
             p.circle(c, ptrX, ptrY, tubeR * 0.5f, 0xCC8FCAFF.toInt())

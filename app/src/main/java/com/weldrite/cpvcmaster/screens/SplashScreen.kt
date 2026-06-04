@@ -38,7 +38,7 @@ class SplashScreen(game: Game) : Screen(game) {
 
         val rise = Geom.easeOutCubic((t / 0.8f).coerceIn(0f, 1f))
         val canY = h * 0.40f + (1f - rise) * h * 0.18f
-        Decor.cementCan(p, c, cx, canY, p.dp(1.35f), glow = true, bmp = game.images.cementCan())
+        Decor.cementCan(p, c, cx, canY, p.dp(1.85f), glow = true, bmp = game.images.cementCan())
 
         val ls = Geom.easeOutBack(((t - 0.5f) / 0.7f).coerceIn(0f, 1f))
         if (ls > 0f) {
