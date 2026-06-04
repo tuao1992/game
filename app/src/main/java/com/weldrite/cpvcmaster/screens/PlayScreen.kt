@@ -444,6 +444,8 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
                 popups.add(Loc.t("perfect_joint"), cx, cy, Palette.GREEN, p.dp(56f))
                 particles.confetti(cx, pipeCY, 26 + combo * 6, intArrayOf(Palette.BLUE_LIGHT, Palette.WHITE, Palette.RED, Palette.AMBER))
                 if (combo >= 2) { popups.add("COMBO x$combo", cx, cy + p.dp(62f), Palette.AMBER, p.dp(48f)); game.audio.play(Sfx.STAR, (1f + combo * 0.06f).coerceAtMost(1.8f)) }
+                val streak = when (combo) { 3 -> "ON FIRE!"; 5 -> "BLAZING!"; 7 -> "UNSTOPPABLE!"; 10 -> "LEGENDARY!"; else -> null }
+                if (streak != null) { popups.add(streak, cx, cy - p.dp(64f), Palette.RED, p.dp(50f)); game.shake(6f) }
             }
             JointResult.MINOR_LEAK -> {
                 game.audio.play(Sfx.SUCCESS); game.haptics.medium(); game.shake(4f)
@@ -633,6 +635,10 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
                     val sev = if (result == JointResult.MAJOR_LEAK) 6 else 2
                     particles.spray(fitX - tubeR, pipeCY, -1.2f, 1.4f, sev, 0xAA29B6F6.toInt(), 320f, tubeR * 0.18f, 700f, 0.5f)
                 }
+                if (result == JointResult.PERFECT && waterFill >= 1f) {
+                    val a = (1f - testHold / 0.7f).coerceIn(0f, 1f)
+                    if (a > 0f) p.ring(c, fitX - tubeR * 0.4f, pipeCY, tubeR * (1.4f + testHold * 7f), p.dp(5f) + a * p.dp(5f), Painter.withAlpha(Palette.GREEN, (a * 230).toInt()))
+                }
             }
         } else {
             if (showFitting) PipeRenderer.fitting(p, c, cfg.fitting, fitX, pipeCY, tubeR, fitAngle, highlight = phase == Phase.ALIGN)
@@ -784,6 +790,7 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
     }
 
     private fun drawTest(c: Canvas) {
+        drawGauge(c, w / 2f, h * 0.35f, p.dp(86f))
         if (waterFill >= 1f) {
             val (label, col) = when (result) {
                 JointResult.PERFECT -> Loc.t("perfect_joint") to Palette.GREEN
@@ -797,6 +804,24 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
         } else {
             p.text(c, Loc.t("pressure_test") + "...", w / 2f, h * 0.78f, p.dp(34f), Palette.BLUE_LIGHT)
         }
+    }
+
+    /** Animated pressure gauge: the needle sweeps to a colored zone matching the result. */
+    private fun drawGauge(c: Canvas, cx: Float, cy: Float, r: Float) {
+        p.panel(c, RectF(cx - r * 1.2f, cy - r * 1.25f, cx + r * 1.2f, cy + r * 0.6f), 0xCC0E2A47.toInt(), r * 0.18f)
+        // Face zones across the top arc (180°..360°): red, amber, green
+        p.arc(c, cx, cy, r, 180f, 60f, Palette.RED, p.dp(11f))
+        p.arc(c, cx, cy, r, 240f, 60f, Palette.AMBER, p.dp(11f))
+        p.arc(c, cx, cy, r, 300f, 60f, Palette.GREEN, p.dp(11f))
+        val target = when (result) { JointResult.PERFECT -> 0.86f; JointResult.MINOR_LEAK -> 0.5f; else -> 0.16f }
+        val pos = target * Geom.easeOutCubic(waterFill)
+        val ang = Math.toRadians((180f + pos * 180f).toDouble())
+        val nx = cx + (cos(ang) * r * 0.82f).toFloat()
+        val ny = cy + (sin(ang) * r * 0.82f).toFloat()
+        p.line(c, cx, cy, nx, ny, Palette.WHITE, p.dp(6f))
+        p.circle(c, cx, cy, p.dp(10f), Palette.WHITE)
+        p.circle(c, cx, cy, p.dp(5f), Palette.BLUE_DARK)
+        p.text(c, "PSI", cx, cy + r * 0.42f, p.dp(22f), Palette.MUTED, bold = false)
     }
 
     private fun bar(c: Canvas, label: String, v: Float) {
