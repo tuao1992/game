@@ -137,6 +137,32 @@ research:
 [Mobile UX – tap targets & thumb zones](https://parachutedesign.ca/blog/thumb-zone-ux/),
 [Hyper-casual retention & difficulty](https://riseuplabs.com/game-retention-metrics/).
 
+## 🔬 Real-World Accuracy
+
+The gameplay mirrors the **actual CPVC solvent-cement joining procedure** defined
+by ASTM D2846 / F493 / F656 and major manufacturers (Weld-On/IPS, Oatey, Lubrizol
+FlowGuard Gold / Corzan, Charlotte Pipe). The step order and on-screen pro-tips
+follow the real sequence:
+
+1. **Cut square** — maximizes the bonding surface.
+2. **Deburr & chamfer** the edge (~10–15°) — so it can't scrape cement out of the socket.
+3. **Clean & dry** both surfaces — done *after* deburring to clear filings.
+4. **Apply CPVC cement** — heavy on the pipe, light in the socket (CPVC-specific, F493).
+5. **Align, insert with a 1/4 turn** to full depth while wet, then **hold** so it can't push out.
+6. **Witness bead & pressure test** — an even bead all around signals a good joint;
+   let it **cure**, then test **with water, never compressed air**.
+
+Each step shows a real-world **pro tip**, and the join step now includes the
+quarter-turn cue and a witness-bead visual at the joint. Note: **Weldrite 456 is a
+one-step cement** — no separate primer is needed where local codes permit (some
+potable-water codes still require priming), which is why the flow has no primer step.
+
+*Sources:* [Weld-On Solvent Welding Guide](https://weldon.com/wp-content/uploads/2015/03/WeldOn_SolventWelding_Guide_2013.pdf) ·
+[Oatey — perfect solvent-cement joint](https://www.oatey.com/faqs-blog-videos-case-studies/blog/how-complete-perfect-solvent-cement-joint) ·
+[FlowGuard Gold — step-by-step](https://www.flowguardgold.com/step-by-step-instructions) ·
+[Corzan — solvent-welding do's & don'ts](https://www.corzan.com/en-us/blog/the-dos-and-donts-of-cpvc-piping-solvent-cement-welding) ·
+ASTM D2846 / F493 / F656
+
 ## 🧱 Tech Stack & Architecture
 
 - **Language:** Kotlin

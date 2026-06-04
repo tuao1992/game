@@ -22,7 +22,8 @@ import kotlin.random.Random
  */
 class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Screen(game) {
 
-    private enum class Phase { SELECT_PIPE, CUT, CLEAN, DEBUR, CEMENT, FIT_SELECT, ALIGN, JOIN, TEST }
+    // Order follows the real CPVC procedure: cut → deburr/chamfer → clean & dry → cement → fit → align → insert+twist+hold → cure/test
+    private enum class Phase { SELECT_PIPE, CUT, DEBUR, CLEAN, CEMENT, FIT_SELECT, ALIGN, JOIN, TEST }
 
     private val rng = Random(System.nanoTime())
     private val level: Level? = if (mode == GameMode.CAREER && levelIndex >= 0) Levels.all[levelIndex] else null
@@ -640,6 +641,20 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
                     if (a > 0f) p.ring(c, fitX - tubeR * 0.4f, pipeCY, tubeR * (1.4f + testHold * 7f), p.dp(5f) + a * p.dp(5f), Painter.withAlpha(Palette.GREEN, (a * 230).toInt()))
                 }
             }
+            // witness bead — the squeezed-out cement collar at the joint mouth
+            if (insert > 0.5f) {
+                val beadX = fitX - gap - tubeR
+                val beadCol = when {
+                    phase == Phase.TEST && result == JointResult.MINOR_LEAK -> 0xCCFFE0A3.toInt()
+                    phase == Phase.TEST && result == JointResult.MAJOR_LEAK -> 0x99FFB3AE.toInt()
+                    else -> 0xCCBFE3FF.toInt()
+                }
+                p.fill.style = android.graphics.Paint.Style.FILL
+                p.fill.color = beadCol
+                c.drawOval(RectF(beadX - tubeR * 0.42f, pipeCY - tubeR * 1.32f, beadX + tubeR * 0.42f, pipeCY + tubeR * 1.32f), p.fill)
+                p.fill.color = 0x66FFFFFF
+                c.drawOval(RectF(beadX - tubeR * 0.16f, pipeCY - tubeR * 1.0f, beadX + tubeR * 0.04f, pipeCY - tubeR * 0.25f), p.fill)
+            }
         } else {
             if (showFitting) PipeRenderer.fitting(p, c, cfg.fitting, fitX, pipeCY, tubeR, fitAngle, highlight = phase == Phase.ALIGN)
             PipeRenderer.pipe(p, c, pipeLeft, pipeCY, pipeLen, tubeR, printed = printed, cementAmt = cementAmt)
@@ -676,7 +691,9 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
         val iw = p.textWidth(instruction, p.dp(36f)) + p.dp(54f)
         p.rrect(c, RectF(w / 2f - iw / 2, h * 0.138f, w / 2f + iw / 2, h * 0.189f), 0x66000000, p.dp(26f))
         p.text(c, instruction, w / 2f, h * 0.173f, p.dp(36f), Palette.WHITE)
-        p.text(c, stepLabel(), w / 2f, h * 0.215f, p.dp(24f), Palette.BLUE_LIGHT, bold = false)
+        p.text(c, stepLabel(), w / 2f, h * 0.211f, p.dp(24f), Palette.BLUE_LIGHT, bold = false)
+        // real-world pro tip (educational)
+        p.text(c, stepTip(), w / 2f, h * 0.248f, p.dp(22f), Palette.OFFWHITE, alpha = 220, bold = false)
     }
 
     private fun renderPhaseUi(c: Canvas) {
@@ -782,11 +799,17 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
 
     private fun drawJoin(c: Canvas) {
         val tx = fitX - tubeR * 0.4f; val ty = pipeCY
-        // hold target ring
-        p.ring(c, tx, ty, tubeR * 2.6f, p.dp(8f), 0x55FFFFFF)
-        p.arc(c, tx, ty, tubeR * 2.6f, -90f, 360f * holdProgress, Palette.GREEN, p.dp(10f))
-        p.textCentered(c, Loc.t("hold"), tx, ty - tubeR * 3.4f, p.dp(30f), if (ptrDown) Palette.GREEN else Palette.WHITE)
-        if (!ptrDown && holdProgress < 0.05f) p.text(c, "PRESS & HOLD HERE", w / 2f, h * 0.8f, p.dp(30f), Palette.WHITE)
+        val r = tubeR * 2.6f
+        p.ring(c, tx, ty, r, p.dp(8f), 0x55FFFFFF)
+        p.arc(c, tx, ty, r, -90f, 360f * holdProgress, Palette.GREEN, p.dp(10f))
+        // quarter-turn cue: a marker sweeps 90° as the joint seats
+        val ang = Math.toRadians((-90f + 90f * holdProgress).toDouble())
+        val mx = tx + (cos(ang) * r).toFloat(); val my = ty + (sin(ang) * r).toFloat()
+        p.circle(c, mx, my, p.dp(15f), Palette.AMBER)
+        p.circle(c, mx, my, p.dp(7f), Palette.WHITE)
+        p.textCentered(c, "1/4 TURN", tx, ty + tubeR * 3.5f, p.dp(24f), Palette.AMBER)
+        p.textCentered(c, Loc.t("hold"), tx, ty - tubeR * 3.5f, p.dp(30f), if (ptrDown) Palette.GREEN else Palette.WHITE)
+        if (!ptrDown && holdProgress < 0.05f) p.text(c, "PRESS, HOLD & TWIST", w / 2f, h * 0.8f, p.dp(30f), Palette.WHITE)
     }
 
     private fun drawTest(c: Canvas) {
@@ -890,4 +913,19 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
         val n = Phase.entries.indexOf(phase) + 1
         return "Step $n / ${Phase.entries.size}"
     }
+
+    /** Short, real-world educational tip for the current step. */
+    private fun stepTip(): String = Loc.t(
+        when (phase) {
+            Phase.SELECT_PIPE -> "tip_select"
+            Phase.CUT -> "tip_cut"
+            Phase.DEBUR -> "tip_debur"
+            Phase.CLEAN -> "tip_clean"
+            Phase.CEMENT -> "tip_cement"
+            Phase.FIT_SELECT -> "tip_fit"
+            Phase.ALIGN -> "tip_align"
+            Phase.JOIN -> "tip_join"
+            Phase.TEST -> "tip_test"
+        }
+    )
 }

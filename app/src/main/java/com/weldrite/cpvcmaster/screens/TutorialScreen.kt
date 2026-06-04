@@ -27,11 +27,11 @@ class TutorialScreen(
     private val particles = Particles().apply { densityScale = game.save.quality.particleScale }
     private val titles = listOf("1. Pipe Preparation", "2. Cement Application", "3. Fitting Alignment", "4. Pipe Insertion", "5. Pressure Testing")
     private val hints = listOf(
-        "Tap to cut the pipe square and clean.",
-        "Drag across the pipe end to coat it evenly.",
-        "Drag to rotate the fitting, then Confirm.",
-        "Press & hold until the bond sets.",
-        "Run water through to test the joint.",
+        "Cut square, then deburr & bevel the edge.",
+        "Coat the pipe end evenly with CPVC cement.",
+        "Align the fitting before the cement sets.",
+        "Insert fully, twist a 1/4 turn, then hold.",
+        "Let it cure, then test with water - never air.",
     )
 
     private var stage = 0
