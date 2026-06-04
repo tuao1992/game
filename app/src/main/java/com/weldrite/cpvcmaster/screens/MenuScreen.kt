@@ -111,6 +111,7 @@ class MenuScreen(game: Game) : Screen(game) {
         drawButtons(c)
 
         p.text(c, Loc.t("slogan2"), cx, h * 0.975f, p.dp(24f), Palette.BLUE_LIGHT, alpha = 200)
+        p.text(c, "v" + com.weldrite.cpvcmaster.BuildConfig.VERSION_NAME, w * 0.035f, h * 0.985f, p.dp(20f), Palette.MUTED, android.graphics.Paint.Align.LEFT, bold = false)
     }
 
     private fun flame(c: android.graphics.Canvas, cx: Float, cy: Float, r: Float) {

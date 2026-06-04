@@ -21,8 +21,8 @@ android {
         applicationId = "com.weldrite.cpvcmaster"
         minSdk = 29
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "1.1"
         // No instrumentation / test runner needed for this game.
         vectorDrawables { useSupportLibrary = false }
     }
