@@ -921,7 +921,9 @@ class PlayScreen(game: Game, val mode: GameMode, val levelIndex: Int = -1) : Scr
             Phase.CUT -> "tip_cut"
             Phase.DEBUR -> "tip_debur"
             Phase.CLEAN -> "tip_clean"
-            Phase.CEMENT -> "tip_cement"
+            // Alternate the application tip with the one-step / no-primer fact so
+            // both pieces of the real procedure get surfaced during this step.
+            Phase.CEMENT -> if ((phaseT / 2.6f).toInt() % 2 == 0) "tip_cement" else "tip_primer"
             Phase.FIT_SELECT -> "tip_fit"
             Phase.ALIGN -> "tip_align"
             Phase.JOIN -> "tip_join"
