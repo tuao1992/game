@@ -15,3 +15,15 @@ captures/
 # OS / editor noise
 .DS_Store
 *.log
+
+# Web design system (design-sync): generated build output + deps are rebuilt
+# from source via cfg.buildCmd; committed inputs are the src/ and .design-sync/.
+design-system/node_modules/
+design-system/dist/
+
+# design-sync staged scripts, generated bundle, machine-local cache/state
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

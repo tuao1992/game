@@ -1,0 +1,36 @@
+{
+  "name": "@weldrite/design-system",
+  "version": "1.0.0",
+  "description": "Weldrite CPVC Master — React design system mirroring the game's UI (blue/white/red plumber-workshop brand).",
+  "license": "UNLICENSED",
+  "private": true,
+  "type": "module",
+  "module": "dist/index.es.js",
+  "main": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js"
+    },
+    "./styles.css": "./src/styles.css",
+    "./tokens.css": "./src/tokens.css"
+  },
+  "files": ["dist", "src"],
+  "sideEffects": ["*.css"],
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "esbuild": "^0.24.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.6.3"
+  }
+}

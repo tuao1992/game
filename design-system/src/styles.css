@@ -1,0 +1,367 @@
+/*
+ * Weldrite CPVC Master — component styles.
+ * Pairs with tokens.css (design-sync wires both into the root styles.css the
+ * design agent consumes). No @import here on purpose: tokens ship separately.
+ *
+ * Idiom: components carry semantic `wr-*` class names; color/space/radius come
+ * from the tokens in tokens.css. To restyle, override the tokens — not these
+ * rules.
+ */
+
+/* ============================ Button ============================ */
+.wr-btn {
+  font-family: var(--wr-font);
+  font-weight: var(--wr-weight-bold);
+  letter-spacing: 0.02em;
+  border: 3px solid transparent;
+  border-radius: var(--wr-radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--wr-space-2);
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  box-shadow: var(--wr-shadow);
+  transition: transform 0.06s ease, box-shadow 0.06s ease, filter 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.wr-btn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25);
+}
+.wr-btn:focus-visible {
+  outline: 3px solid var(--wr-blue-light);
+  outline-offset: 2px;
+}
+.wr-btn:disabled,
+.wr-btn[aria-disabled="true"] {
+  cursor: not-allowed;
+  filter: brightness(0.6);
+  opacity: 0.75;
+  box-shadow: none;
+}
+.wr-btn--full {
+  display: flex;
+  width: 100%;
+}
+
+/* sizes */
+.wr-btn--sm {
+  font-size: 15px;
+  padding: 8px 16px;
+  min-height: 40px;
+  border-radius: var(--wr-radius-sm);
+}
+.wr-btn--md {
+  font-size: 18px;
+  padding: 12px 24px;
+  min-height: 52px;
+}
+.wr-btn--lg {
+  font-size: 22px;
+  padding: 16px 32px;
+  min-height: 64px;
+  border-radius: var(--wr-radius-lg);
+}
+
+/* variants */
+.wr-btn--primary {
+  background: var(--wr-blue);
+  color: var(--wr-white);
+  border-color: rgba(66, 165, 245, 0.6);
+}
+.wr-btn--secondary {
+  background: var(--wr-white);
+  color: var(--wr-blue-dark);
+  border-color: rgba(66, 165, 245, 0.6);
+}
+.wr-btn--danger {
+  background: var(--wr-red);
+  color: var(--wr-white);
+  border-color: rgba(255, 111, 96, 0.6);
+}
+.wr-btn--success {
+  background: var(--wr-green);
+  color: var(--wr-white);
+  border-color: rgba(128, 226, 126, 0.6);
+}
+.wr-btn--ghost {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--wr-white);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: none;
+}
+
+/* ============================ Toggle ============================ */
+.wr-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wr-space-3);
+  font-family: var(--wr-font);
+  font-weight: var(--wr-weight-regular);
+  color: var(--wr-offwhite);
+  cursor: pointer;
+  user-select: none;
+}
+.wr-toggle__track {
+  position: relative;
+  width: 64px;
+  height: 34px;
+  border-radius: var(--wr-radius-pill);
+  background: #5a6b7b;
+  transition: background 0.18s ease;
+  flex: none;
+}
+.wr-toggle__knob {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--wr-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  transition: transform 0.18s ease;
+}
+.wr-toggle--on .wr-toggle__track {
+  background: var(--wr-green);
+}
+.wr-toggle--on .wr-toggle__knob {
+  transform: translateX(30px);
+}
+.wr-toggle--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.wr-toggle__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* ============================ Panel ============================ */
+.wr-panel {
+  font-family: var(--wr-font);
+  border-radius: var(--wr-radius-lg);
+  padding: var(--wr-space-5);
+  color: var(--wr-offwhite);
+  background: var(--wr-panel);
+}
+.wr-panel--elevated {
+  box-shadow: var(--wr-shadow-soft);
+}
+.wr-panel--blue {
+  background: var(--wr-blue);
+  color: var(--wr-white);
+}
+.wr-panel--white {
+  background: var(--wr-white);
+  color: var(--wr-blue-dark);
+}
+.wr-panel--ink {
+  background: var(--wr-ink);
+  color: var(--wr-offwhite);
+}
+.wr-panel--glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* ============================ Chip ============================ */
+.wr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wr-space-2);
+  font-family: var(--wr-font);
+  font-weight: var(--wr-weight-bold);
+  font-size: 15px;
+  padding: 6px 14px;
+  border-radius: var(--wr-radius-pill);
+  background: var(--wr-panel);
+  color: var(--wr-white);
+  line-height: 1;
+  white-space: nowrap;
+}
+.wr-chip--blue {
+  background: var(--wr-blue);
+}
+.wr-chip--amber {
+  background: var(--wr-amber);
+  color: var(--wr-blue-dark);
+}
+.wr-chip--red {
+  background: var(--wr-red);
+}
+.wr-chip--green {
+  background: var(--wr-green);
+}
+.wr-chip--ghost {
+  background: rgba(255, 255, 255, 0.14);
+}
+.wr-chip__icon {
+  display: inline-flex;
+  width: 1em;
+  height: 1.15em;
+}
+
+/* ============================ ProgressBar ============================ */
+.wr-progress {
+  width: 100%;
+  font-family: var(--wr-font);
+}
+.wr-progress__track {
+  position: relative;
+  width: 100%;
+  height: 16px;
+  border-radius: var(--wr-radius-pill);
+  background: rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+.wr-progress__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: var(--wr-radius-pill);
+  background: linear-gradient(180deg, var(--wr-blue-light), var(--wr-blue));
+  transition: width 0.3s ease;
+}
+.wr-progress--success .wr-progress__fill {
+  background: linear-gradient(180deg, #6fd47a, var(--wr-green));
+}
+.wr-progress--amber .wr-progress__fill {
+  background: linear-gradient(180deg, #ffd454, var(--wr-amber));
+}
+.wr-progress__label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: var(--wr-weight-bold);
+  color: var(--wr-offwhite);
+}
+
+/* ============================ StarRating ============================ */
+.wr-stars {
+  display: inline-flex;
+  gap: 4px;
+  line-height: 0;
+}
+.wr-star--on {
+  fill: var(--wr-amber);
+  stroke: #b8860b;
+}
+.wr-star--off {
+  fill: rgba(0, 0, 0, 0.2);
+  stroke: rgba(255, 255, 255, 0.4);
+}
+
+/* ============================ RankBadge ============================ */
+.wr-rank {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--wr-space-3);
+  font-family: var(--wr-font);
+}
+.wr-rank__title {
+  font-weight: var(--wr-weight-bold);
+  color: var(--wr-white);
+  font-size: 18px;
+  line-height: 1.1;
+}
+.wr-rank__sub {
+  font-weight: var(--wr-weight-regular);
+  color: var(--wr-muted);
+  font-size: 13px;
+}
+
+/* ============================ Gauge ============================ */
+.wr-gauge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--wr-font);
+  color: var(--wr-white);
+}
+.wr-gauge__value {
+  font-weight: var(--wr-weight-bold);
+  font-size: 22px;
+  margin-top: -6px;
+}
+.wr-gauge__label {
+  font-weight: var(--wr-weight-regular);
+  font-size: 13px;
+  color: var(--wr-muted);
+}
+
+/* ============================ Logo / Wordmark ============================ */
+.wr-logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: var(--wr-font);
+  line-height: 1;
+}
+.wr-logo__sub {
+  margin-top: 6px;
+  font-weight: var(--wr-weight-bold);
+  letter-spacing: 0.38em;
+  color: var(--wr-blue-light);
+  text-indent: 0.38em;
+}
+
+/* ============================ Tagline ============================ */
+.wr-tagline {
+  font-family: var(--wr-font);
+  font-weight: var(--wr-weight-bold);
+  color: var(--wr-blue-light);
+  letter-spacing: 0.01em;
+}
+.wr-tagline--strong {
+  color: var(--wr-white);
+}
+
+/* ============================ WorkshopBackground ============================ */
+.wr-workshop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at 50% 18%,
+      rgba(255, 255, 255, 0.06),
+      transparent 60%
+    ),
+    linear-gradient(180deg, var(--wr-bg-top), var(--wr-bg));
+  overflow: hidden;
+  isolation: isolate;
+}
+.wr-workshop__pegboard {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.16) 2px, transparent 2.5px);
+  background-size: 38px 38px;
+  background-position: 12px 12px;
+  pointer-events: none;
+  z-index: 0;
+}
+.wr-workshop__bench {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18%;
+  background: #6d4c2e;
+  border-top: 5px solid #8a6239;
+  pointer-events: none;
+  z-index: 0;
+}
+.wr-workshop__content {
+  position: relative;
+  z-index: 1;
+}

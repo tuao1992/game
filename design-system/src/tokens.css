@@ -1,0 +1,69 @@
+/*
+ * Weldrite CPVC Master — design tokens.
+ * Values mirror the game's Palette (ui/Widgets.kt), rank colors and
+ * environment accents (data/Models.kt) one-for-one, so the web design system
+ * reads as the same product as the Android game.
+ */
+:root {
+  /* ---- Brand palette (blue / white / red) ---- */
+  --wr-blue: #1565c0;
+  --wr-blue-dark: #0e2a47;
+  --wr-blue-mid: #12395f;
+  --wr-blue-light: #42a5f5;
+  --wr-white: #ffffff;
+  --wr-offwhite: #eaf2fb;
+  --wr-red: #e53935;
+  --wr-red-dark: #b71c1c;
+  --wr-green: #43a047;
+  --wr-amber: #ffc107;
+  --wr-ink: #0a1f36;
+  --wr-panel: #173a5e;
+  --wr-muted: #9fb6ce;
+
+  /* ---- Surfaces ---- */
+  --wr-bg: #0e2a47;
+  --wr-bg-top: #13486f;
+
+  /* ---- Rank colors (Apprentice → Master) ---- */
+  --wr-rank-apprentice: #8d6e63;
+  --wr-rank-junior: #90a4ae;
+  --wr-rank-technician: #42a5f5;
+  --wr-rank-senior: #26c6da;
+  --wr-rank-expert: #ab47bc;
+  --wr-rank-master: #ffc107;
+
+  /* ---- Environment accents (career chapters) ---- */
+  --wr-env-kitchen: #2e7d32;
+  --wr-env-bathroom: #0097a7;
+  --wr-env-house: #1565c0;
+  --wr-env-apartment: #6a1b9a;
+  --wr-env-commercial: #ef6c00;
+  --wr-env-factory: #455a64;
+
+  /* ---- Typography ---- */
+  --wr-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --wr-weight-regular: 500;
+  --wr-weight-bold: 800;
+
+  /* ---- Radii (game buttons round to ~0.28 × height) ---- */
+  --wr-radius-sm: 10px;
+  --wr-radius-md: 16px;
+  --wr-radius-lg: 22px;
+  --wr-radius-pill: 999px;
+
+  /* ---- Spacing scale ---- */
+  --wr-space-1: 4px;
+  --wr-space-2: 8px;
+  --wr-space-3: 12px;
+  --wr-space-4: 16px;
+  --wr-space-5: 24px;
+  --wr-space-6: 32px;
+
+  /* ---- Elevation ----
+   * The game fakes a drop shadow with a translucent copy offset straight down
+   * by ~6dp at 25% black; that chunky bottom shadow is the signature look. */
+  --wr-shadow: 0 6px 0 rgba(0, 0, 0, 0.25);
+  --wr-shadow-lg: 0 8px 0 rgba(0, 0, 0, 0.28);
+  --wr-shadow-soft: 0 12px 28px rgba(0, 0, 0, 0.38);
+}

@@ -1,0 +1,12 @@
+{
+  "pkg": "@weldrite/design-system",
+  "globalName": "WeldriteDS",
+  "shape": "package",
+  "entry": "./design-system/dist/index.es.js",
+  "cssEntry": "dist/weldrite.css",
+  "buildCmd": "npm --prefix design-system run build",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "ProgressBar": { "cardMode": "column" }
+  }
+}
