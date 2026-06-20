@@ -1,10 +1,14 @@
-"""Generate 500 joke candidates and write them to jokes.txt.
+"""Generate joke candidates and write them to jokes.txt.
 
-The combinatorial generators give us volume ("do this 500 times"); the
-hand-written seed list is where the genuinely good ones live, and the top 5
-are curated by hand from there.
+Usage: python3 generate_jokes.py [count]   (default 500)
+
+The combinatorial generators give us volume; the hand-written seed list is
+where the genuinely good ones live, and the top 5 are curated by hand from
+there. Multi-variable templates keep the unique space well above 10k so we
+can produce that many *distinct* jokes.
 """
 
+import sys
 import random
 
 random.seed(7)
@@ -38,28 +42,58 @@ SEEDS = [
     "Why did the bicycle fall over? It was two-tired.",
 ]
 
-# --- Combinatorial generators (the volume) ---------------------------------
+# --- Word pools (widened so the unique space exceeds 10k) ------------------
 ANIMALS = ["cow", "duck", "octopus", "penguin", "sloth", "llama", "shark",
-           "owl", "frog", "crab", "moth", "goat", "bee", "snail", "wolf"]
+           "owl", "frog", "crab", "moth", "goat", "bee", "snail", "wolf",
+           "otter", "raccoon", "hedgehog", "walrus", "gecko", "ferret",
+           "badger", "lobster", "pelican", "mongoose", "narwhal", "hamster",
+           "beaver", "jaguar", "koala"]
 PROFESSIONS = ["accountant", "wizard", "barista", "plumber", "philosopher",
                "DJ", "pirate", "librarian", "ghost", "lawyer", "clown",
-               "scientist", "chef", "lifeguard", "magician"]
+               "scientist", "chef", "lifeguard", "magician", "electrician",
+               "beekeeper", "sculptor", "referee", "astronaut", "locksmith",
+               "florist", "banker", "surgeon", "juggler", "archaeologist",
+               "cartographer", "blacksmith", "mime", "auctioneer"]
 ADJ = ["sad", "sneaky", "lazy", "ambitious", "tiny", "enormous", "polite",
-       "suspicious", "broke", "anxious", "confident", "retired"]
+       "suspicious", "broke", "anxious", "confident", "retired", "sleepy",
+       "dramatic", "frugal", "reckless", "wholesome", "grumpy", "optimistic",
+       "nervous", "smug", "clumsy", "fearless", "restless", "sarcastic"]
 TOPICS = ["math", "the ocean", "Mondays", "WiFi", "gravity", "coffee",
-          "the gym", "taxes", "cheese", "the moon", "ghosts", "Bluetooth"]
+          "the gym", "taxes", "cheese", "the moon", "ghosts", "Bluetooth",
+          "jazz", "traffic", "deadlines", "weather", "spreadsheets",
+          "parking", "laundry", "leftovers", "alarms", "dial-up",
+          "daylight savings", "group chats", "small talk"]
+PLACES = ["library", "bakery", "gym", "courtroom", "spaceship", "aquarium",
+          "lighthouse", "laundromat", "observatory", "dentist's office",
+          "casino", "bowling alley", "art gallery", "submarine", "ski lodge",
+          "planetarium", "taco truck", "hardware store", "opera house",
+          "escape room"]
+ACTIVITIES = ["yodeling", "competitive napping", "interpretive dance",
+              "sourdough baking", "parkour", "beekeeping", "juggling",
+              "speed chess", "ice sculpting", "the kazoo", "sword swallowing",
+              "tightrope walking", "extreme couponing", "birdwatching",
+              "ghost hunting", "miming", "taxidermy", "competitive whistling",
+              "foraging", "fencing", "pottery", "breakdancing", "falconry",
+              "stand-up comedy", "geocaching"]
+RELATIVES = ["uncle", "grandma", "cousin", "nephew", "mother-in-law",
+             "stepdad", "great-aunt", "second cousin", "brother", "niece",
+             "godfather", "roommate"]
 
 
 def why_did(_):
-    a = random.choice(ANIMALS)
-    p = random.choice(PROFESSIONS)
-    return f"Why did the {a} become a {p}? It finally found its calling."
+    return (f"Why did the {random.choice(ADJ)} {random.choice(ANIMALS)} "
+            f"become a {random.choice(PROFESSIONS)}? It finally found its calling.")
 
 
-def call_a(_):
-    adj = random.choice(ADJ)
-    a = random.choice(ANIMALS)
-    return f"What do you call a {adj} {a}? A {adj}-case scenario."
+def walked_into(_):
+    return (f"A {random.choice(ADJ)} {random.choice(ANIMALS)} walked into a "
+            f"{random.choice(PLACES)}. The {random.choice(PROFESSIONS)} "
+            f"didn't even look up.")
+
+
+def relative_tried(_):
+    return (f"My {random.choice(RELATIVES)} took up {random.choice(ACTIVITIES)} "
+            f"to impress a {random.choice(PROFESSIONS)}. Bold strategy, honestly.")
 
 
 def two_things(_):
@@ -70,19 +104,17 @@ def two_things(_):
     return f"{x.capitalize()} and {y} have one thing in common: nobody asked."
 
 
-def knock(_):
-    p = random.choice(PROFESSIONS)
-    return f"Knock knock. Who's there? A {p}. A {p} who? Exactly, nobody remembers."
-
-
-GENERATORS = [why_did, call_a, two_things, knock]
+GENERATORS = [why_did, walked_into, relative_tried, two_things]
 
 
 def main():
-    jokes = list(SEEDS)
+    count = int(sys.argv[1]) if len(sys.argv) > 1 else 500
+
+    jokes = list(SEEDS)[:count]
     seen = set(j.lower() for j in jokes)
     attempts = 0
-    while len(jokes) < 500 and attempts < 20000:
+    cap = count * 50  # generous headroom; unique space is far larger than 10k
+    while len(jokes) < count and attempts < cap:
         attempts += 1
         joke = random.choice(GENERATORS)(None)
         key = joke.lower()
@@ -92,9 +124,9 @@ def main():
 
     with open("jokes.txt", "w") as f:
         for i, joke in enumerate(jokes, 1):
-            f.write(f"{i:03d}. {joke}\n")
+            f.write(f"{i:05d}. {joke}\n")
 
-    print(f"Generated {len(jokes)} jokes -> jokes.txt")
+    print(f"Generated {len(jokes)} jokes -> jokes.txt (after {attempts} draws)")
 
 
 if __name__ == "__main__":
