@@ -17,6 +17,15 @@ Native **Kotlin + Jetpack Compose**, **Material 3**, no network, no ads, no trac
   win-rate badges.
 - **Tier list** — all 23 civs grouped S→D; tap any civ to open its detail.
 
+## Screenshots
+
+Rendered headlessly from the real Compose screens (Robolectric native graphics +
+Roborazzi — no emulator). See [`screenshots/`](screenshots/).
+
+| Civilizations | Civ detail | Tier list |
+|---|---|---|
+| ![list](screenshots/01_civ_list.png) | ![detail](screenshots/02_detail_english.png) | ![tier](screenshots/04_tier_list.png) |
+
 ## Where the data comes from
 
 The dataset is bundled as type-safe Kotlin in
@@ -60,7 +69,7 @@ JSON API without touching the UI.
 # Release APK (unsigned by default)
 ./gradlew :aoe4:assembleRelease
 
-# Dataset/unit tests
+# Dataset/unit tests (also re-records the screenshots above via Roborazzi)
 ./gradlew :aoe4:testDebugUnitTest
 ```
 

@@ -54,6 +54,12 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.isReturnDefaultValues = true
+        unitTests.all {
+            // Force Roborazzi to write screenshots (record mode) and give the
+            // native-graphics renderer enough heap.
+            it.systemProperty("roborazzi.test.record", "true")
+            it.maxHeapSize = "2g"
+        }
     }
 
     packaging {
@@ -90,6 +96,10 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.13")
     testImplementation("androidx.test:core:1.6.1")
+    // Headless Compose screenshots on the JVM (no emulator needed).
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.21.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.21.0")
 
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
