@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "WeldriteCPVCMaster"
 include(":app")
+include(":aoe4")

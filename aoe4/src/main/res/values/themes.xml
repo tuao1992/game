@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Window/splash theme. Compose draws the actual UI; this just sets the
+         window + system bar colours so there is no white flash on launch. -->
+    <style name="Theme.Aoe4Advisor" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/aoe_bg</item>
+        <item name="android:statusBarColor">@color/aoe_surface</item>
+        <item name="android:navigationBarColor">@color/aoe_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
