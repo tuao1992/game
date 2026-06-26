@@ -1,6 +1,6 @@
 """Generate joke candidates and write them to jokes.txt.
 
-Usage: python3 generate_jokes.py [count]   (default 500)
+Usage: python3 generate_jokes.py [count] [seed]   (defaults: 500, 7)
 
 The combinatorial generators give us volume; the hand-written seed list is
 where the genuinely good ones live, and the top 5 are curated by hand from
@@ -10,8 +10,6 @@ can produce that many *distinct* jokes.
 
 import sys
 import random
-
-random.seed(7)
 
 # --- Hand-written seed jokes (the strong material) -------------------------
 SEEDS = [
@@ -109,6 +107,8 @@ GENERATORS = [why_did, walked_into, relative_tried, two_things]
 
 def main():
     count = int(sys.argv[1]) if len(sys.argv) > 1 else 500
+    seed = int(sys.argv[2]) if len(sys.argv) > 2 else 7
+    random.seed(seed)
 
     jokes = list(SEEDS)[:count]
     seen = set(j.lower() for j in jokes)
@@ -126,7 +126,8 @@ def main():
         for i, joke in enumerate(jokes, 1):
             f.write(f"{i:05d}. {joke}\n")
 
-    print(f"Generated {len(jokes)} jokes -> jokes.txt (after {attempts} draws)")
+    print(f"Generated {len(jokes)} jokes (seed={seed}) -> jokes.txt "
+          f"(after {attempts} draws)")
 
 
 if __name__ == "__main__":
